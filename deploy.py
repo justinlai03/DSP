@@ -1,3 +1,4 @@
+import pickle
 import streamlit as st
 import pandas as pd
 import joblib
@@ -6,6 +7,7 @@ from textblob import TextBlob
 import matplotlib.pyplot as plt
 import seaborn as sns
 import base64
+import gdown, os
 
 # Set page configuration
 st.set_page_config(
@@ -20,9 +22,21 @@ sidebar.title("Navigation")
 page = sidebar.radio("Select a page", ["Home", "Introduction", "Prediction", "Dashboard"])
 
 # Load models and dataset
-misinformation_pipeline = joblib.load("C:/Users/user/OneDrive/Documents/UM/Y3S1/DSP/misinformation_pipeline-v2.pkl")
-emotion_analyzer = joblib.load("C:/Users/user/OneDrive/Documents/UM/Y3S1/DSP/emotion_analyzer.pkl")
-data_path = "C:/Users/user/OneDrive/Documents/UM/Y3S1/DSP/processed_data-v2.csv"
+file_url = "https://drive.google.com/uc?id=1YpPVbcu4MEtdLi3l52K1CbpJWJbHxH6t"
+output = 'emotion_analyzer-1.pkl'
+
+if not os.path.exists('emotion_analyzer-1.pkl'):
+    gdown.download(file_url, output, quiet=False)
+else: 
+    print(f"{output} already exists. Skipping download.")
+
+with open(output, 'rb') as f:
+    model = pickle.load(f)
+misinformation_pipeline = joblib.load("misinformation_pipeline-v2.pkl")
+# emotion_analyzer = joblib.load("C:/Users/user/OneDrive/Documents/UM/Y3S1/DSP/emotion_analyzer-1.pkl")
+emotion_analyzer = model
+data_path = "processed_data-v2.csv"
+
 try:
     dataset = pd.read_csv(data_path)
 except Exception as e:
@@ -112,8 +126,8 @@ elif page == "Introduction":
         st.write(f"Error Details: {dataset_error}")
 
     st.subheader("Heatmap of Feature Correlations")
-    emotion_data = pd.read_csv("C:/Users/user/OneDrive/Documents/UM/Y3S1/DSP/sentiment_emotion_analysis_results-v2.csv")
-    misinformation_data = pd.read_csv("C:/Users/user/OneDrive/Documents/UM/Y3S1/DSP/data_with_text_length.csv")
+    emotion_data = pd.read_csv("sentiment_emotion_analysis_results-v2.csv")
+    misinformation_data = pd.read_csv("data_with_text_length.csv")
 
     misinformation_data['claim_status'] = misinformation_data['claim_status'].replace({'opinion': 0, 'claim': 1})
     numerical_df = misinformation_data.select_dtypes(include=['float64', 'int64'])
