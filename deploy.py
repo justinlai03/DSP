@@ -27,13 +27,10 @@ output = 'emotion_analyzer-1.pkl'
 
 if not os.path.exists('emotion_analyzer-1.pkl'):
     gdown.download(file_url, output, quiet=False)
-else: 
-    print(f"{output} already exists. Skipping download.")
 
 with open(output, 'rb') as f:
     model = pickle.load(f)
 misinformation_pipeline = joblib.load("misinformation_pipeline-v2.pkl")
-# emotion_analyzer = joblib.load("C:/Users/user/OneDrive/Documents/UM/Y3S1/DSP/emotion_analyzer-1.pkl")
 emotion_analyzer = model
 data_path = "processed_data-v2.csv"
 
